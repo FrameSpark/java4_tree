@@ -109,7 +109,7 @@ public class SearchTree<K extends Comparable, V> {
         if (compare(key, (K)curr.key) == -1) // key < curr.key
             remove(curr.left, key);
         else
-            if (compare(key, (K)curr.key) == 1)
+            if (compare(key, (K)curr.key) == 1) // key > curr.key
                 remove(curr.right, key);
             else
                 if (curr.left != null && curr.right != null) {
