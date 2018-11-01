@@ -24,6 +24,7 @@ public class Main {
 
         tree.print();
 
+        System.out.println("Delete key '2'");
         tree.remove(test);
 
         tree.print();

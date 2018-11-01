@@ -1,23 +1,24 @@
 package com.javaLab.SearchTree;
 
 import java.util.Comparator;
-import  java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 public class SearchTree<K extends Comparable, V> {
 
     private Node root = null;
     private Comparator comparator;
 
+    /**
+     * Узел дерева
+     * @param <K> тип ключа
+     * @param <V> тип значения
+     */
     class Node<K, V> {
         public K key;
         public V value;
         protected Node<K, V> left, right;   // Левое и правое поддерево
-        protected Node<K, V> prev;          // ссылка на предка
+        protected Node<K, V> prev;          // ссылка на parent
 
         public Node(Node prev, K key, V value) {
-            // TODO клонирование объекта, а не присваивание ссылки
             this.key = key;
             this.value = value;
             this.prev = prev;
@@ -25,7 +26,26 @@ public class SearchTree<K extends Comparable, V> {
         }
     }
 
-    // если нет компаратора
+    /**
+     * Сравнение ключей
+     * @param key1
+     * @param key2
+     * @return
+     * -1 - key1 <  key2
+     *  0 - key1 == key2
+     *  1 - key1 >  key2
+     */
+    private int compare(K key1, K key2) {
+        if (comparator == null) {
+            return ((Comparable)key1).compareTo(key2); // если компаратора нет, то берем его из класса
+        }
+        return comparator.compare(key1, key2);
+    }
+
+    /**
+     * Конструктор
+     * Если нет компаратора, то будет использоваться compareTo()
+     */
     public SearchTree() {
         comparator = null;
     }
@@ -34,7 +54,11 @@ public class SearchTree<K extends Comparable, V> {
         this.comparator = comparator;
     }
 
-    //вставка
+    /**
+     * Вставка ключа в дерево. Один ключ встречается только один раз
+     * @param key ключ
+     * @param value значение
+     */
     public void insert(K key, V value) {
         root = insert(root, null, key, value);
     }
@@ -44,74 +68,67 @@ public class SearchTree<K extends Comparable, V> {
             curr = new Node(prev, key, value);
         }
         else {
-            if (comparator != null)
-                if (comparator.compare(key, curr.key) == -1)
-                    curr.left = insert(curr.left, curr, key, value);
-                else
+            if (compare(key, (K)curr.key) == -1)
+                curr.left = insert(curr.left, curr, key, value);
+            else
+                if (compare(key, (K)curr.key) == 1) //Если  необходимы дублирующие ключи, удалить
                     curr.right = insert(curr.right, curr, key, value);
-            else {
-                // TODO if comp is NULL
-            }
-
         }
         return curr;
     }
 
-    //поиск по ключу
+
+    /**
+     * Поиск по ключу
+     * @param key ключ
+     * @return ссылка на узел, в котором находится заданный ключ
+     */
     public Node search(K key) {
         return search(root, key);
     }
     private Node search(Node curr, K key) {
-        if (comparator != null) {
-            if (curr == null || comparator.compare(key, curr.key) == 0)
-                return curr;
-            if (comparator.compare(key, curr.key) == -1)
-                return search(curr.left, key);
-            else
-                return search(curr.right, key);
-        }
-        else {
-            // TODO if comp is NULL
-        }
-        return null;
+        if (curr == null || compare(key, (K)curr.key) == 0)
+            return curr;
+        if (compare(key, (K)curr.key) == -1)
+            return search(curr.left, key);
+        else
+            return search(curr.right, key);
     }
 
-    //удаление по ключу
+
+    /**
+     * Удаление узла по ключу
+     * @param key ключ
+     */
     public void remove(K key) {
         remove(root, key);
     }
     private void remove(Node curr, K key) {
         if (curr == null)
             return;
-        if (comparator != null) {
-            if (comparator.compare(key, curr.key) == -1) // key < curr.key
-                remove(curr.left, key);
+        if (compare(key, (K)curr.key) == -1) // key < curr.key
+            remove(curr.left, key);
+        else
+            if (compare(key, (K)curr.key) == 1)
+                remove(curr.right, key);
             else
-                if (comparator.compare(key, curr.key) == 1)
-                    remove(curr.right, key);
-                else
-                    if (curr.left != null && curr.right != null) {
-                        Node temp = curr.right;
-                        while (temp.left != null)
-                            temp = temp.left;
+                if (curr.left != null && curr.right != null) {
+                    Node temp = curr.right;
+                    while (temp.left != null)
+                        temp = temp.left;
 
-                        // TODO клонирование объекта, а не присваивание ссылки
-                        curr.key = temp.key;
-                        curr.value = temp.value;
-                        replace(temp, temp.right);
-                    }
+                    curr.key = temp.key;
+                    curr.value = temp.value;
+                    replace(temp, temp.right);
+                }
+                else
+                    if (curr.left != null)
+                        replace(curr, curr.left);
                     else
-                        if (curr.left != null)
-                            replace(curr, curr.left);
+                        if (curr.right != null)
+                            replace(curr, curr.right);
                         else
-                            if (curr.right != null)
-                                replace(curr, curr.right);
-                            else
-                                replace(curr, null);
-        }
-        else {
-            // TODO if comp is NULL
-        }
+                            replace(curr, null);
     }
     private void replace(Node a, Node b) {
         if (a.prev == null)
@@ -125,7 +142,7 @@ public class SearchTree<K extends Comparable, V> {
             b.prev = a.prev;
     }
 
-    //вывод
+    // вывод
     public void print() {
         System.out.println("TREE ");
         print(root);

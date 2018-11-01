@@ -2,18 +2,21 @@ package com.javaLab.Test;
 
 import java.util.Comparator;
 
-public class TestForTree implements Comparable{
+/**
+ * Класс для тестирования SearchTree
+ */
+public class TestForTree implements Comparable<TestForTree>{
 
     private Integer num;
 
     public TestForTree(int num){
         this.num = num;
     }
-
     public TestForTree(){
 
     }
 
+    // создаем компаратор с помощью анонимного класса
     public static final Comparator<TestForTree> cmp = new Comparator<>() {
         @Override
         public int compare(TestForTree o1, TestForTree o2) {
@@ -30,7 +33,11 @@ public class TestForTree implements Comparable{
     }
 
     @Override
-    public int compareTo(Object o) {
+    public int compareTo(TestForTree o) {
+        if (this.num < o.num)
+            return -1;
+        if (this.num > o.num)
+            return 1;
         return 0;
     }
 
